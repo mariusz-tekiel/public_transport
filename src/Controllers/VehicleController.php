@@ -8,34 +8,33 @@ class VehicleController
 {
     public function fetchVehiclesFromAPI()
     {
-        $apiUrl = "https://api.przewoznik.com/vehicles";
+        $apiKey = "5cd346e7-cf0e-4759-97aa-700a71379146"; // Mój klucz API
+        $apiUrl = "https://api.um.warszawa.pl/api/action/busestrams_get/?resource_id=f2e5503e927d-4ad3-9500-4ab9e55deb59&apikey=" . $apiKey . "&type=1";
 
-        // Wyłączenie weryfikacji SSL, aby uniknąć błędów
-        $context = stream_context_create([
-            "ssl" => [
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-            ]
-        ]);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
-        // Pobranie danych z API
-        $response = file_get_contents($apiUrl, false, $context);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-        if ($response === false) {
+        if ($httpCode !== 200 || !$response) {
             http_response_code(500);
-            echo json_encode(["error" => "Nie udało się pobrać danych z API"]);
+            echo json_encode(["error" => "Błąd pobierania danych z API ZTM"]);
             return;
         }
 
         $vehicles = json_decode($response, true);
-        if (!$vehicles) {
+        if (!$vehicles || !isset($vehicles["result"])) {
             http_response_code(500);
-            echo json_encode(["error" => "Błąd dekodowania JSON"]);
+            echo json_encode(["error" => "Błąd dekodowania danych JSON"]);
             return;
         }
 
-        Vehicle::saveVehicles($vehicles);
-
+        Vehicle::saveVehicles($vehicles["result"]);
         echo json_encode(["status" => "success"]);
     }
 

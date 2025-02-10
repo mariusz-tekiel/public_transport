@@ -47,6 +47,7 @@ function updateVehicles() {
     fetch('/api/vehicles')
         .then(response => response.json())
         .then((vehicles: Vehicle[]) => {
+            Mapa.clearObjects(); // Czyścimy stare pojazdy
             vehicles.forEach(addVehicleToMap);
         })
         .catch(error => console.error('Błąd pobierania pojazdów:', error));

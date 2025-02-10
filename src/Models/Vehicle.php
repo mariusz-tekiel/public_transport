@@ -11,28 +11,30 @@ class Vehicle
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare("INSERT INTO vehicles_positions (vehicle_id, latitude, longitude, name, timestamp) 
-                               VALUES (:vehicle_id, :latitude, :longitude, :name, NOW())
-                               ON CONFLICT (vehicle_id) DO UPDATE 
-                               SET latitude = EXCLUDED.latitude, 
-                                   longitude = EXCLUDED.longitude, 
-                                   timestamp = NOW()");
+                           VALUES (:vehicle_id, :latitude, :longitude, :name, NOW())
+                           ON CONFLICT (vehicle_id) DO UPDATE 
+                           SET latitude = EXCLUDED.latitude, 
+                               longitude = EXCLUDED.longitude, 
+                               timestamp = NOW()");
 
-        foreach ($vehicles as $vehicle) {
-            $stmt->execute([
-                ':vehicle_id' => $vehicle['id'],
-                ':latitude' => $vehicle['latitude'],
-                ':longitude' => $vehicle['longitude'],
-                ':name' => $vehicle['name'] ?? 'Brak nazwy'
-            ]);
+        try {
+            foreach ($vehicles as $vehicle) {
+                $stmt->execute([
+                    ':vehicle_id' => $vehicle['VehicleNumber'] ?? '',
+                    ':latitude' => $vehicle['Lat'] ?? 0,
+                    ':longitude' => $vehicle['Lon'] ?? 0,
+                    ':name' => 'Autobus ZTM'
+                ]);
+            }
+        } catch (\PDOException $e) {
+            error_log("Błąd zapisu do bazy: " . $e->getMessage());
         }
     }
+
 
     public static function getLatestPositions()
     {
         $pdo = Database::getConnection();
-        //Interval czasowy powodowal blad, wiec go usuwamy chwilowo
-        // $stmt = $pdo->query("SELECT vehicle_id, latitude, longitude, name FROM vehicles_positions WHERE timestamp >= NOW() - INTERVAL '10 minutes'");
-
         $stmt = $pdo->query("SELECT vehicle_id, latitude, longitude, name FROM vehicles_positions");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
