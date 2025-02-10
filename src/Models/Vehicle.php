@@ -30,6 +30,7 @@ class Vehicle
     public static function getLatestPositions()
     {
         $pdo = Database::getConnection();
+        //Interval czasowy powodowal blad, wiec go usuwamy chwilowo
         // $stmt = $pdo->query("SELECT vehicle_id, latitude, longitude, name FROM vehicles_positions WHERE timestamp >= NOW() - INTERVAL '10 minutes'");
 
         $stmt = $pdo->query("SELECT vehicle_id, latitude, longitude, name FROM vehicles_positions");

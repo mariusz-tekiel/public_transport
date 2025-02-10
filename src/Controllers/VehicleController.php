@@ -8,7 +8,7 @@ class VehicleController
 {
     public function fetchVehiclesFromAPI()
     {
-        $apiUrl = "https://api.przewoznik.com/vehicles"; // Adres API przewoźnika
+        $apiUrl = "https://api.przewoznik.com/vehicles";
 
         // Wyłączenie weryfikacji SSL, aby uniknąć błędów
         $context = stream_context_create([
