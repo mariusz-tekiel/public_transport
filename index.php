@@ -11,9 +11,9 @@ if ($uri === '' || $uri === 'index.php' || $uri === 'public_transport' || $uri =
     (new MapController())->render();
 } elseif ($uri === 'public_transport/map') {
     (new MapController())->render();
-} elseif ($uri === 'public_transport/api/vehicles') {
+} elseif ($uri === 'public_transport/api/vehicles' || $uri === 'api/vehicles') {
     (new VehicleController())->getVehicles();
-} elseif ($uri === 'api/fetch-vehicles') {
+} elseif ($uri === 'public_transport/api/fetch-vehicles' || $uri === 'api/fetch-vehicles') {
     (new VehicleController())->fetchVehiclesFromAPI();
 } else {
     http_response_code(404);
