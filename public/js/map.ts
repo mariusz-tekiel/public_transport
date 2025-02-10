@@ -6,13 +6,13 @@ interface Vehicle {
 }
 
 let Mapa: any;
-const vehicleMarkers: Record<string, any> = {}; // Obiekt do przechowywania markerów pojazdów
+const vehicleMarkers: Record<string, any> = {}; // Przechowywanie markerów pojazdów
 
 function TargeoMapInitialize() {
     const mapOptions = {
         container: 'TargeoMapContainer',
         z: 12,
-        c: { y: 52.2298, x: 21.0122 }, // Warszawa jako domyślna lokalizacja
+        c: { y: 52.2298, x: 21.0122 }, // Warszawa
         modArguments: {
             Layers: { modes: ['map', 'satellite'] },
             POI: { disabled: false, visible: true },
@@ -23,15 +23,15 @@ function TargeoMapInitialize() {
     Mapa.initialize();
 
     updateVehicles(); // Pobieramy pojazdy od razu po załadowaniu mapy
-    setInterval(updateVehicles, 10000); // Odświeżanie co 10 sekund
+    setInterval(updateVehicles, 10000); // Odświeżanie co 10 sek.
 }
 
 function addVehicleToMap(vehicle: Vehicle) {
     if (vehicleMarkers[vehicle.vehicle_id]) {
-        // Jeśli pojazd już istnieje, aktualizujemy jego pozycję
+        // Aktualizacja pozycji pojazdu
         vehicleMarkers[vehicle.vehicle_id].moveTo({ y: vehicle.latitude, x: vehicle.longitude });
     } else {
-        // Jeśli pojazd jeszcze nie istnieje, tworzymy nowy punkt na mapie
+        // Tworzymy nowy marker, jeśli pojazdu jeszcze nie ma
         const vehicleMarker = new Targeo.MapObject.Point({
             c: { y: vehicle.latitude, x: vehicle.longitude },
             icon: '/assets/bus_icon.png', // Ścieżka do ikonki pojazdu
@@ -43,12 +43,22 @@ function addVehicleToMap(vehicle: Vehicle) {
     }
 }
 
-function updateVehicles() {
-    fetch('/api/vehicles')
-        .then(response => response.json())
-        .then((vehicles: Vehicle[]) => {
-            Mapa.clearObjects(); // Czyścimy stare pojazdy
-            vehicles.forEach(addVehicleToMap);
-        })
-        .catch(error => console.error('Błąd pobierania pojazdów:', error));
+async function updateVehicles() {
+    try {
+        const response = await fetch('/public_transport/api/vehicles');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const vehicles: Vehicle[] = await response.json();
+        Mapa.clearObjects(); // Czyścimy mapę
+        vehicles.forEach(addVehicleToMap); // Dodajemy pojazdy
+    } catch (error) {
+        console.error('Błąd pobierania pojazdów:', error);
+    }
 }
+
+// Uruchamiamy mapę po załadowaniu strony
+document.addEventListener('DOMContentLoaded', () => {
+    TargeoMapInitialize();
+});
