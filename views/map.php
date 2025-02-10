@@ -49,7 +49,7 @@
         }
 
         function updateVehicles() {
-            fetch('/api/vehicles')
+            fetch('/public_transport/api/vehicles')
                 .then(response => response.json())
                 .then(vehicles => {
                     Mapa.clearObjects(); // Usuń stare pojazdy
@@ -63,7 +63,7 @@
 
 <body>
     <div id="TargeoMapContainer" style="width:100%; height:600px;"></div>
-    <script src="/js/map.js" type="module"></script>
+    <script src="/public_transport/public/js/map.ts" type="module"></script>
     <!-- <script src="https://mapa.targeo.pl/Targeo.html?vn=3_0&k=ZjlhMmU2Nzc5OGQwNjczMWZkYWE2MGRlZTY1ZjRkY2U3M2E1M2ZkYg==&f=TargeoMapInitialize&e=TargeoMapContainer&ln=pl" type="text/javascript"></script> -->
 </body>
 

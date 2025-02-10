@@ -26,7 +26,24 @@ function TargeoMapInitialize() {
     setInterval(updateVehicles, 10000); // Odświeżanie co 10 sek.
 }
 
+async function updateVehicles() {
+    try {
+        const response = await fetch('/public_transport/api/vehicles'); // Poprawiona ścieżka
+        if (!response.ok) throw new Error(`Błąd API: ${response.status}`);
+        const vehicles = await response.json();
+        console.log("📡 Otrzymano pojazdy:", vehicles);
+        vehicles.forEach(addVehicleToMap);
+    } catch (error) {
+        console.error('❌ Błąd pobierania pojazdów:', error);
+    }
+}
+
 function addVehicleToMap(vehicle: Vehicle) {
+    if (!vehicle.latitude || !vehicle.longitude) {
+        console.warn(`⚠ Pominięto pojazd ${vehicle.vehicle_id} - brak współrzędnych.`);
+        return;
+    }
+
     if (vehicleMarkers[vehicle.vehicle_id]) {
         // Aktualizacja pozycji pojazdu
         vehicleMarkers[vehicle.vehicle_id].moveTo({ y: vehicle.latitude, x: vehicle.longitude });
@@ -35,26 +52,11 @@ function addVehicleToMap(vehicle: Vehicle) {
         const vehicleMarker = new Targeo.MapObject.Point({
             c: { y: vehicle.latitude, x: vehicle.longitude },
             icon: '/assets/bus_icon.png', // Ścieżka do ikonki pojazdu
-            title: vehicle.name
+            title: `Linia ${vehicle.name}`
         });
 
         Mapa.addObject(vehicleMarker);
         vehicleMarkers[vehicle.vehicle_id] = vehicleMarker;
-    }
-}
-
-async function updateVehicles() {
-    try {
-        const response = await fetch('/public_transport/api/vehicles');
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const vehicles: Vehicle[] = await response.json();
-        Mapa.clearObjects(); // Czyścimy mapę
-        vehicles.forEach(addVehicleToMap); // Dodajemy pojazdy
-    } catch (error) {
-        console.error('Błąd pobierania pojazdów:', error);
     }
 }
 

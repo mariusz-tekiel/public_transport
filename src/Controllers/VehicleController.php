@@ -45,8 +45,15 @@ class VehicleController
     public function getVehicles()
     {
         header('Content-Type: application/json');
-        $data = Vehicle::getLatestPositions();
-        error_log("Zwracam " . count($data) . " pojazdów do frontendu");
-        echo json_encode($data);
+        $vehicles = Vehicle::getLatestPositions();
+
+        if (empty($vehicles)) {
+            error_log("🚨 Brak pojazdów w bazie danych!");
+            echo json_encode(["error" => "Brak pojazdów"]);
+            return;
+        }
+
+        error_log("📡 Zwracam " . count($vehicles) . " pojazdów do frontendu.");
+        echo json_encode($vehicles);
     }
 }
